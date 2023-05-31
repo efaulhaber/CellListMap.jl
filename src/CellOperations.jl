@@ -16,7 +16,7 @@ $(INTERNAL)
 # Extended help
 
 Obtaint the coordinates of `x` as a fraction of unit cell vectors, first
-positive cell. `x` is a vector of dimension `N` and `cell` a matrix of 
+positive cell. `x` is a vector of dimension `N` and `cell` a matrix of
 dimension `NxN`
 
 ## Example
@@ -35,7 +35,7 @@ julia> wrap_cell_fraction(x,unit_cell_matrix)
 
 """
 @inline function wrap_cell_fraction(x::AbstractVector{T}, unit_cell_matrix::AbstractMatrix) where {T}
-    # Division by `oneunit` is to support Unitful quantities. 
+    # Division by `oneunit` is to support Unitful quantities.
     # this workaround works here because the units cancel.
     # see: https://github.com/PainterQubits/Unitful.jl/issues/46
     x_stripped = x ./ oneunit(T)
@@ -54,7 +54,7 @@ $(INTERNAL)
 # Extended help
 
 Wraps the coordinates of point `x` such that the returning coordinates are in the
-first unit cell with all-positive coordinates. 
+first unit cell with all-positive coordinates.
 
 ## Example
 
@@ -83,7 +83,7 @@ $(INTERNAL)
 
 # Extended help
 
-Wraps the coordinates of point `x` such that it is the minimum image relative to `xref`. 
+Wraps the coordinates of point `x` such that it is the minimum image relative to `xref`.
 
 """
 @inline function wrap_relative_to(x, xref, unit_cell_matrix::SMatrix{N,N,T}) where {N,T}
@@ -142,7 +142,7 @@ provided.
     translation_image(x::AbstractVector{<:AbstractVector},unit_cell_matrix,indices)
 
 Translates a complete set of coordinates given a set of indexes of unit-cells. Returns a new
-set of coordinates. 
+set of coordinates.
 
 ## Example
 
@@ -182,7 +182,7 @@ $(INTERNAL)
 # Extended help
 
 Replicate the system (modifying the original array of coordinates) in all
-directions defined by the periodic system and by the range of unitary cells 
+directions defined by the periodic system and by the range of unitary cells
 of interest. `x` can be a `(N,M)` matrix, and the unit cell matrix can be
 provided instead of the `box`.
 
@@ -238,7 +238,7 @@ $(INTERNAL)
 
 # Extended help
 
-Given the linear index of the cell in the cell list, returns the cartesian indices 
+Given the linear index of the cell in the cell list, returns the cartesian indices
 of the cell (for arbitrary dimension N).
 
 """
@@ -252,7 +252,7 @@ $(INTERNAL)
 
 # Extended help
 
-Returns the index of the cell, in the 1D representation, from its cartesian coordinates. 
+Returns the index of the cell, in the 1D representation, from its cartesian coordinates.
 
 """
 @inline cell_linear_index(nc::SVector{N,Int}, indices) where {N} =
@@ -289,7 +289,7 @@ end
 """
     limits(x)
 
-Returns the lengths of a orthorhombic box that encompasses all the particles defined in `x`, 
+Returns the lengths of a orthorhombic box that encompasses all the particles defined in `x`,
 to be used to set a box without effective periodic boundary conditions.
 
 """
@@ -312,7 +312,7 @@ Returns the lengths of a orthorhombic box that encompasses all the particles def
 and `y`, to used to set a box without effective periodic boundary conditions.
 
 """
-function limits(x::T, y::T) where {T<:AbstractVector{<:AbstractVector}}
+function limits(x::AbstractVector{<:AbstractVector}, y::AbstractVector{<:AbstractVector})
     xmin, xmax = _minmax(x)
     ymin, ymax = _minmax(y)
     xymin = min.(xmin, ymin)
@@ -320,7 +320,7 @@ function limits(x::T, y::T) where {T<:AbstractVector{<:AbstractVector}}
     return Limits(xymax .- xymin)
 end
 
-function limits(x::T, y::T) where {T<:AbstractMatrix}
+function limits(x::AbstractMatrix, y::AbstractMatrix)
     N = size(x, 1)
     M = size(y, 1)
     N == M || throw(DimensionMismatch("The first dimension of the input matrices must be equal. "))
@@ -340,8 +340,8 @@ $(INTERNAL)
 # Extended help
 
 These functions rotate the unit cell matrix such that the largest lattice vector is oriented
-along the x-axis and, for 3D cells, also that the the plane formed by the largest and 
-second largest lattice vectors is oriented perpendicular to the z-axis. 
+along the x-axis and, for 3D cells, also that the the plane formed by the largest and
+second largest lattice vectors is oriented perpendicular to the z-axis.
 
 """
 function align_cell end
@@ -376,7 +376,7 @@ function _align_cell2D!(m::AbstractMatrix{T}) where {T}
         sinθ = -norm(a) / (a[x]^2 / a[y] + a[y])
         cosθ = -a[x] * sinθ / a[y]
         #! format: off
-        R = @SMatrix[cosθ -sinθ 
+        R = @SMatrix[cosθ -sinθ
                      sinθ  cosθ]
         #! format: on
         m = R * m
@@ -401,7 +401,7 @@ function _align_cell3D!(m::AbstractMatrix{T}) where {T}
 
     # Find rotation that aligns a with x
     a1 = normalize(a)
-    v = SVector(0, a1[z], -a1[y]) # a1 × i 
+    v = SVector(0, a1[z], -a1[y]) # a1 × i
     if norm_sqr(v) ≈ 0
         R1 = one(m)
     else
@@ -454,18 +454,18 @@ end
     @test R ≈ [-l l; -l -l]
 
     #! format: off
-    m = @SMatrix[ 
+    m = @SMatrix[
         1  0  0
-        0  1  0 
+        0  1  0
         0  0  1
     ]
     #! format: on
     @test align_cell(m) == (one(m), one(m))
 
     #! format: off
-    m = @SMatrix[ 
+    m = @SMatrix[
         3  0  0
-        0  2  0 
+        0  2  0
         0  0  1
     ]
     #! format: on
@@ -592,7 +592,7 @@ end
 
 $(INTERNAL)
 
-For 2D and 3D matrices, returns the maximum and minimum coordinates of all vertices. 
+For 2D and 3D matrices, returns the maximum and minimum coordinates of all vertices.
 
 """
 function cell_limits(m::AbstractMatrix{T}) where {T}
@@ -667,6 +667,3 @@ function draw_cell(m::AbstractMatrix; aspect_ratio=:auto)
     )
     return plt
 end
-
-
-
